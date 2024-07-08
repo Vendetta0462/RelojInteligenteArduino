@@ -40,6 +40,10 @@ public:
         // No requerido para el display
     }
 
+    String getCurrentInfo() const {
+        return currentInfo;
+    }
+
 private:
     Adafruit_LiquidCrystal lcd; // Objeto de la librería Adafruit
     String currentInfo;
@@ -64,27 +68,21 @@ private:
 
 class TemperatureSensor : public Sensor {
 public:
-    TemperatureSensor(int pin) : pin(pin), temperature(0), isFaulty(false) {}
+    TemperatureSensor(int pin) : pin(pin), temperature(0){}
     
     void update() override {
         int rawValue = analogRead(pin); // Leer valor analógico
         float voltage = (rawValue / 1024.0) * 5.0; // Convertir a voltaje
         temperature = (voltage - 0.5) * 100; // Convertir a temperatura en grados Celsius (ecuacion para TMP36)
-        isFaulty = (temperature < -10 || temperature > 50); // Falla si la temperatura está fuera de rango
     }
 
     float getTemperature() const {
         return temperature;
     }
 
-    bool getIsFaulty() const {
-        return isFaulty;
-    }
-
 private:
     int pin;
     float temperature;
-    bool isFaulty;
 };
 
 class InclinationSensor : public Sensor {

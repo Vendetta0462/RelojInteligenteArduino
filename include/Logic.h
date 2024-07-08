@@ -1,6 +1,20 @@
 #include <Sensors_Actuators.h> // Incluye las clases de sensores y actuadores
 
 // Clases para la lógica de características específicas
+
+class TemperatureFaliureDetector {
+public:
+    void update(float temperature, float tempRef) { // Actualizar con la temperatura actual y la de referencia
+        isFaulty = ((temperature - tempRef) < -10 || (temperature - tempRef) > 50); // Falla si la temperatura está fuera de rango
+        }
+
+        bool getIsFaulty() const {
+        return isFaulty;
+        }
+private:
+    bool isFaulty;
+};
+
 class StepCounter {
 public:
     void update(bool isInclined) {

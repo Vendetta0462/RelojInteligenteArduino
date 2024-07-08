@@ -1,4 +1,4 @@
-#include "Sensors_Actuators.h" // Incluye las clases de sensores y actuadores
+// #include "Sensors_Actuators.h" // Incluye las clases de sensores y actuadores
 #include "Logic.h"          // Incluye las clases de lógica
 
 // Clase principal SmartWatch
@@ -49,6 +49,7 @@ private:
     SleepDetector sleepDetector;
     CalorieCalculator calorieCalculator;
     DayNightDetector dayNightDetector;
+    TemperatureFaliureDetector tempFaliureDetector;
     
     int buttonPin;
     unsigned long timeAwake;
@@ -67,6 +68,7 @@ private:
         sleepDetector.update(inclinationSensor.getIsInclined());
         calorieCalculator.update(stepCounter.getSteps());
         dayNightDetector.update(lightSensor.getLight());
+        tempFaliureDetector.update(tempSensor.getTemperature(), tempRef);
         
         if (sleepDetector.isSleeping()) { // Si está durmiendo
                 timeAwake = 0; // Reiniciar el tiempo despierto
@@ -74,21 +76,24 @@ private:
             timeAwake += 1; // Incrementar el tiempo despierto en 1 segundo
         }
         
-        if (calorieCalculator.getCaloriesBurned() > 500) { // Si ha quemado más de 500 calorías
+        if (calorieCalculator.getCaloriesBurned() > 2100) { // Si ha quemado más de x calorías (para una persona de 70kg)
             vibrator.activate(500);
+            display.showInfo("Calorias en el Limite 2100+");
         }
         
-        if (tempSensor.getIsFaulty()) { // Si el sensor de temperatura falla
-            display.showInfo("Temp Sensor Error"); // Mostrar mensaje de error
-            buzzer.activate(500);
-            vibrator.activate(1000);
+        if (tempFaliureDetector.getIsFaulty()) { // Si el sensor de temperatura falla
+            if(display.getCurrentInfo() != "Temp Sensor Error"){ // Si no se ha mostrado el mensaje de error
+                display.showInfo("Temp Sensor Error"); // Mostrar mensaje de error
+                buzzer.activate(500);
+                vibrator.activate(1000);
+            }
         }
     }
     
     void updateDisplay() {
         display.setBacklight(lightSensor.getLight()); // Ajustar el brillo de la pantalla
         
-        if (!tempSensor.getIsFaulty()) { // Si el sensor de temperatura no falla
+        if (!tempFaliureDetector.getIsFaulty()) { // Si el sensor de temperatura no falla
             String info;
             switch (displayMode) {
                 case 0:
