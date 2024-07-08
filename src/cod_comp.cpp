@@ -92,17 +92,19 @@ private:
 
 class SensorInclinacion {
 public:
-    SensorInclinacion(int pin) : pin(pin), steps(0) { // Inicializar con el pin de entrada
+    SensorInclinacion(int pin) : pin(pin), steps(0), stepping(false), timeInclined(0) { // Inicializar con el pin de entrada
         pinMode(pin, INPUT);
     }
     
     void update() {
-        bool stepping = false;
         if (!stepping && analogRead(pin) > 512) { // Asumimos que el sensor está inclinado si el valor es mayor que la mitad
             steps++;
             stepping = true;
+            timeInclined = millis();
+
         } else if (analogRead(pin) <= 512) {
             stepping = false;
+            timeInclined = 0;
         }
         // int sensorValue = analogRead(pin);
         // if (sensorValue > 512) { // Asumimos que el sensor está inclinado si el valor es mayor que la mitad
@@ -115,8 +117,7 @@ public:
     }
     
     bool isSleeping() {
-        int sensorValue = analogRead(pin);
-        return sensorValue < 100; // Asumimos que está "dormido" si el valor es muy bajo
+        return timeInclined > 0 && millis() - timeInclined > 5000; // Asumimos que está durmiendo si ha pasado más de 5 segundos inclinado
     }
     
     void resetSteps() {
@@ -126,6 +127,8 @@ public:
 private:
     int pin;
     int steps;
+    bool stepping;
+    unsigned long timeInclined;
 };
 
 class SmartWatch {
@@ -139,7 +142,7 @@ public:
         buttonPin(A0),
         caloriesBurned(0),
         timeAwake(0),
-        isDaytime(true),
+        isDaytime(false),
         lastUpdateTime(0),
         displayMode(0),
         isFaulty(false),
@@ -153,7 +156,7 @@ public:
     
     void update() { // Actualizar el reloj
         unsigned long currentTime = millis();
-        if (currentTime - lastUpdateTime > 200) { // Actualizar cada cierto tiempo
+        if (currentTime - lastUpdateTime > 1000) { // Actualizar cada cierto tiempo
             lastUpdateTime = currentTime;
             
             inclinacionSensor.update(); // Actualizar el sensor de inclinación
@@ -240,7 +243,7 @@ private: // Componentes y variables del reloj
     
     void checkCalories() {
         // Cálculo simple de calorías basado en pasos (ajustar modelo)
-        caloriesBurned = inclinacionSensor.getSteps() * 0.05;
+        caloriesBurned = inclinacionSensor.getSteps() * 0.1;
         
         if (caloriesBurned > 500) { // Umbral arbitrario (ajustar umbral)
             vibrator.vibrate(500);
@@ -266,6 +269,8 @@ private: // Componentes y variables del reloj
             // Amanecer
             buzzer.beep(500);
             vibrator.vibrate(1000);
+            // Resetear pasos
+            inclinacionSensor.resetSteps();
         }
         wasDaytime = isDaytime;
     }
