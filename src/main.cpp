@@ -15,7 +15,8 @@ public:
         lastUpdateTime(0),
         displayMode(0),
         tempRef(0),
-        dayNightDetector(buzzer, vibrator, stepCounter)
+        dayNightDetector(buzzer, vibrator, stepCounter),
+        caloriesLimit(false)
     {}
     
     void init() {
@@ -26,7 +27,7 @@ public:
     
     void update() {
         unsigned long currentTime = millis();
-        if (currentTime - lastUpdateTime > 200) { // Actualizar cada x tiempo
+        if (currentTime - lastUpdateTime > refreshRate) { // Actualizar cada x tiempo
             lastUpdateTime = currentTime;
             
             updateSensors(); // Actualizar los sensores
@@ -52,10 +53,12 @@ private:
     TemperatureFaliureDetector tempFaliureDetector;
     
     int buttonPin;
-    unsigned long timeAwake;
+    unsigned  timeAwake;
     unsigned long lastUpdateTime;
     int displayMode;
     float tempRef;
+    bool caloriesLimit;
+    int refreshRate = 200;
     
     void updateSensors() {
         lightSensor.update();
@@ -73,12 +76,21 @@ private:
         if (sleepDetector.isSleeping()) { // Si está durmiendo
                 timeAwake = 0; // Reiniciar el tiempo despierto
         } else { // Si está despierto
-            timeAwake += 1; // Incrementar el tiempo despierto en 1 segundo
+            timeAwake += 1; // Incrementar el tiempo despierto en 1 refresRate
         }
         
         if (calorieCalculator.getCaloriesBurned() > 2100) { // Si ha quemado más de x calorías (para una persona de 70kg)
-            vibrator.activate(500);
-            display.showInfo("Calorias en el Limite 2100+");
+            if (!caloriesLimit)
+            {
+                vibrator.activate(500);
+                display.showInfo("Calorias Limite");
+                caloriesLimit = true;
+            }
+        }
+
+        if (calorieCalculator.getCaloriesBurned() == 0)
+        {
+            caloriesLimit = false;
         }
         
         if (tempFaliureDetector.getIsFaulty()) { // Si el sensor de temperatura falla
@@ -106,7 +118,9 @@ private:
                     info = "Cal: " + String(calorieCalculator.getCaloriesBurned());
                     break;
                 case 3:
-                    info = "Awake: " + String(timeAwake / 3600) + "h " + String((timeAwake % 3600) / 60) + "m " + String(timeAwake % 60) + "s";
+                    float timeAwakeSeconds = timeAwake * refreshRate / 1000;
+                    int timeAwakeReal = int(timeAwakeSeconds);
+                    info = "Awake: " + String(timeAwakeReal / 3600) + "h " + String((timeAwakeReal % 3600) / 60) + "m " + String(timeAwakeReal % 60) + "s";
                     break;
             }
             display.showInfo(info); // Mostrar la información en la pantalla

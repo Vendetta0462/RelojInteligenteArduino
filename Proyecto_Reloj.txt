@@ -1,0 +1,47 @@
+Prototipo de Reloj Inteligente
+
+Descripción del Problema:
+Se requiere un prototipo de reloj inteligente que utilice una pantalla LCD para mostrar información diversa, ajuste su iluminación según la luz ambiental, mida la temperatura del usuario, vibre y suene en situaciones específicas, y tenga un sistema de detección de fallos en el sensor de temperatura. Además, debe contar pasos y detectar si el usuario está dormido para reiniciar el conteo de pasos durante la noche.
+
+Resumen del Proyecto:
+El proyecto consiste en crear un reloj inteligente prototipo que utilice una pantalla LCD controlada por I2C para mostrar información sobre temperatura, pasos, calorías, tiempo despierto. La pantalla se ilumina según la luz ambiental y cambia la información mostrada con un pulsador. El reloj también debe medir la temperatura, contar pasos usando un giroscopio, vibrar (durante un tiempo limitado) cuando las calorías consumidas superen un umbral, y sonar y vibrar al amanecer. Debe detectar fallos en el sensor de temperatura y tener un botón de reinicio para restablecer el sistema.
+
+Lista de Componentes:
+Arduino Uno
+Pantalla LCD con comunicación I2C
+Pulsador x2
+Sensor de luz (LDR)
+Sensor de temperatura
+Vibrador (motor de vibración)
+Buzzer
+Giroscopio (sensor de inclinación)
+Resistores
+Cables de conexión
+Protoboard (Obligatorio) (Todos los componentes deben conectarse entre si por medio del protoboard)
+
+Requisitos Mínimos del Sistema:
+El sistema debe encender y controlar una pantalla LCD mediante I2C.
+Debe ajustar la iluminación de la pantalla según la luz ambiental.
+Debe medir la temperatura del usuario y detectar fallos en el sensor de temperatura.
+Debe contar pasos usando un giroscopio y detectar si el usuario está dormido.
+Debe proporcionar alertas mediante vibración y sonido en situaciones específicas.
+Debe tener un botón de reinicio para restablecer el sistema en caso de fallo del sensor de temperatura.
+
+Criterios de Aceptación/Evaluación:
+Funcionamiento de la Pantalla LCD:
+La pantalla LCD debe encenderse durante diez segundos al presionar el pulsador.
+Los click en el pulsador una vez se enciende deben cambiar la información mostrada (temperatura, pasos, calorías, tiempo despierto).
+Ajuste de Iluminación:
+La pantalla debe ajustar su iluminación según la cantidad de luz ambiental (más luz durante el día, menos luz durante la noche).
+Medición y Alerta de Temperatura:
+El reloj debe medir la temperatura del usuario.
+Debe vibrar cuando las calorías consumidas superen un umbral.
+Debe sonar y vibrar al amanecer.
+El calculo del consumo de calorías se debe calcular en base a las mediciones que se están tomando bajo algún criterio "aceptado" (Buscar justificacion en la WEB)
+Debe detectar que la persona se ha dormido
+Detección de Fallos del Sensor:
+El reloj debe detectar si el sensor de temperatura mide fuera del rango esperado en algún momento y poner en fallo el reloj.
+Debe tener un botón de reinicio para restablecer el reloj a los valores de fábrica si se detecta un fallo en el sensor de temperatura.
+Conteo de Pasos y Detección de Sueño:
+El reloj debe contar los pasos usando un giroscopio.
+Debe detectar si el usuario está dormido (giroscopio con inclinación '0' durante más de 30 segundos) y reiniciar el conteo de pasos durante la noche (60 segundos desde que se oscurece el día)
